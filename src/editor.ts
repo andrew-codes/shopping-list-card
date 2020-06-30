@@ -44,7 +44,7 @@ const options = {
   },
 };
 
-@customElement('boilerplate-card-editor')
+@customElement('shopping-list-card-editor')
 export class BoilerplateCardEditor extends LitElement implements LovelaceCardEditor {
   @property() public hass?: HomeAssistant;
   @property() private _config?: BoilerplateCardConfig;
@@ -116,7 +116,7 @@ export class BoilerplateCardEditor extends LitElement implements LovelaceCardEdi
     }
 
     // You can restrict on domain type
-    const entities = Object.keys(this.hass.states).filter(eid => eid.substr(0, eid.indexOf('.')) === 'sun');
+    const entities = Object.keys(this.hass.states).filter((eid) => eid.substr(0, eid.indexOf('.')) === 'sun');
 
     return html`
       <div class="card-config">
@@ -136,11 +136,7 @@ export class BoilerplateCardEditor extends LitElement implements LovelaceCardEdi
                   .configValue=${'entity'}
                 >
                   <paper-listbox slot="dropdown-content" .selected=${entities.indexOf(this._entity)}>
-                    ${entities.map(entity => {
-                      return html`
-                        <paper-item>${entity}</paper-item>
-                      `;
-                    })}
+                    ${entities.map((entity) => html` <paper-item>${entity}</paper-item> `)}
                   </paper-listbox>
                 </paper-dropdown-menu>
               </div>
