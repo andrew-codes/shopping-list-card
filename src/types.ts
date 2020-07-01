@@ -1,6 +1,6 @@
 import { ActionConfig, LovelaceCardConfig } from 'custom-card-helpers';
 
-export interface BoilerplateCardConfig extends LovelaceCardConfig {
+export interface ShoppingListCardConfig extends LovelaceCardConfig {
   type: string;
   show_warning?: boolean;
   show_error?: boolean;
@@ -11,6 +11,12 @@ export interface BoilerplateCardConfig extends LovelaceCardConfig {
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;
+}
+
+export interface ShoppingList {
+  id: string;
+  name: string;
+  items: Array<ShoppingListItem>;
 }
 
 export interface ShoppingListItem {

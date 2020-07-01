@@ -1,10 +1,10 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-  "name": "Boilerplate Card Development",
+  "name": "Shopping List Card Development",
   "image": "ludeeus/container:monster",
   "context": "..",
   "appPort": ["5000:5000", "9123:8123"],
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "yarn",
   "runArgs": [
     "-v",
     "${env:HOME}${env:USERPROFILE}/.ssh:/tmp/.ssh" // This is added so you can push from inside the container

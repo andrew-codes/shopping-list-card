@@ -1,7 +1,7 @@
 import { LitElement, html, customElement, property, TemplateResult, CSSResult, css } from 'lit-element';
 import { HomeAssistant, fireEvent, LovelaceCardEditor, ActionConfig } from 'custom-card-helpers';
 
-import { BoilerplateCardConfig } from './types';
+import { ShoppingListCardConfig } from './types';
 
 const options = {
   required: {
@@ -47,10 +47,10 @@ const options = {
 @customElement('shopping-list-card-editor')
 export class BoilerplateCardEditor extends LitElement implements LovelaceCardEditor {
   @property() public hass?: HomeAssistant;
-  @property() private _config?: BoilerplateCardConfig;
+  @property() private _config?: ShoppingListCardConfig;
   @property() private _toggle?: boolean;
 
-  public setConfig(config: BoilerplateCardConfig): void {
+  public setConfig(config: ShoppingListCardConfig): void {
     this._config = config;
   }
 

@@ -1,19 +1,15 @@
+import _ from 'lodash';
 import { LitElement, html, customElement, property, CSSResult, TemplateResult, css, PropertyValues } from 'lit-element';
 import {
   HomeAssistant,
   hasConfigOrEntityChanged,
-  hasAction,
-  ActionHandlerEvent,
-  handleAction,
   LovelaceCardEditor,
   getLovelace,
   LovelaceCard,
 } from 'custom-card-helpers';
-
 import './editor';
 
-import { BoilerplateCardConfig, ShoppingListItem } from './types';
-import { actionHandler } from './action-handler-directive';
+import { ShoppingListCardConfig, ShoppingList, ShoppingListItem } from './types';
 import { CARD_VERSION } from './const';
 
 import { localize } from './localize/localize';
@@ -43,9 +39,9 @@ export class ShoppingListCard extends LitElement {
   }
 
   @property() public hass!: HomeAssistant;
-  @property() private _config!: BoilerplateCardConfig;
+  @property() private _config!: ShoppingListCardConfig;
 
-  public setConfig(config: BoilerplateCardConfig): void {
+  public setConfig(config: ShoppingListCardConfig): void {
     if (!config || config.show_error) {
       throw new Error(localize('common.invalid_configuration'));
     }
@@ -55,45 +51,48 @@ export class ShoppingListCard extends LitElement {
     }
 
     this._config = {
-      name: 'Boilerplate',
+      name: 'Shopping List Card',
       ...config,
     };
   }
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
-    return hasConfigOrEntityChanged(this, changedProps, false);
+    try {
+      return hasConfigOrEntityChanged(this, changedProps, false);
+    } catch {
+      return true;
+    }
   }
 
   protected render(): TemplateResult | void {
-    // TODO Check for stateObj or other necessary things and render a warning if missing
     if (this._config.show_warning) {
       return this.showWarning(localize('common.show_warning'));
     }
+    const { items } = JSON.parse(
+      this.hass.states[this._config.entity].state.toString().replace(/'/g, '"'),
+    ) as ShoppingList;
 
-    const { name, items } = JSON.parse(this.hass.states[this._config.entity].state.toString().replace(/'/g, '"'));
+    const itemsByStatus = _.groupBy(items, 'status');
+    console.log(itemsByStatus);
 
     return html`
-      <ha-card
-        .header=${name}
-        @action=${this._handleAction}
-        .actionHandler=${actionHandler({
-          hasHold: hasAction(this._config.hold_action),
-          hasDoubleClick: hasAction(this._config.double_tap_action),
-        })}
-        tabindex="0"
-        aria-label=${`${this._config.entity}`}
-      >
-        <ul>
-          ${items.map((item) => `<li>${item.value}</li>`)}
-        </ul>
+      <ha-card .header=${this._config.name} tabindex="0" aria-label=${`${this._config.entity}`}>
+        ${Object.entries(itemsByStatus).map(
+          ([status, items]) =>
+            html`<h3>${status}</h3>
+              ${(items as Array<ShoppingListItem>).map(
+                (item) =>
+                  html`<paper-checkbox .checked="${item.status === 'completed'}" @change="${this._handleChange}"
+                    >${item.value}</paper-checkbox
+                  >`,
+              )}`,
+        )}
       </ha-card>
     `;
   }
 
-  private _handleAction(ev: ActionHandlerEvent): void {
-    if (this.hass && this._config && ev.detail.action) {
-      handleAction(this, this.hass, this._config, ev.detail.action);
-    }
+  private _handleChange(evt): void {
+    console.log(evt.target.checked);
   }
 
   private showWarning(warning: string): TemplateResult {
@@ -112,6 +111,14 @@ export class ShoppingListCard extends LitElement {
   }
 
   static get styles(): CSSResult {
-    return css``;
+    return css`
+      paper-checkbox {
+        --paper-checkbox-label-spacing: 16px;
+        --paper-checkbox-size: 24px;
+        width: 100%;
+        font-size: 20px;
+        padding: 24px 24px 24px 32px;
+      }
+    `;
   }
 }
