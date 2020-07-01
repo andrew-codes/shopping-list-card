@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { LitElement, html, customElement, property, CSSResult, TemplateResult, css, PropertyValues } from 'lit-element';
 import {
   HomeAssistant,
@@ -77,16 +76,29 @@ export class ShoppingListCard extends LitElement {
 
     return html`
       <ha-card .header=${this._config.name} tabindex="0" aria-label=${`${this._config.entity}`}>
-        ${Object.entries(itemsByStatus).map(
-          ([status, items]) =>
-            html`<h3>${status}</h3>
-              ${(items as Array<ShoppingListItem>).map(
+        <div class="ha-card-body">
+          <section>
+            ${(items as Array<ShoppingListItem>)
+              .filter((item) => item.status === 'active')
+              .map(
                 (item) =>
                   html`<paper-checkbox .checked="${item.status === 'completed'}" @change="${this._handleChange}"
                     >${item.value}</paper-checkbox
                   >`,
-              )}`,
+              )}
+          </section>
+          <section>
+            <h2 class="section-heading">Purchased</h2>
+            ${(items as Array<ShoppingListItem>)
+              .filter((item) => item.status === 'completed')
+              .map(
+                (item) =>
+                  html`<paper-checkbox .checked="${item.status === 'completed'}" @change="${this._handleChange}"
+                    >${item.value}</paper-checkbox
+                  >`,
         )}
+          </section>
+        </div>
       </ha-card>
     `;
   }
@@ -112,12 +124,23 @@ export class ShoppingListCard extends LitElement {
 
   static get styles(): CSSResult {
     return css`
+      .ha-card-body {
+        padding: 0 16px;
+      }
+      section:last-child {
+        border-top: 1px solid gray;
+        padding: 16px 0;
+      }
+      .section-heading {
+        margin: 0;
+        padding: 0 8px;
+      }
       paper-checkbox {
         --paper-checkbox-label-spacing: 16px;
         --paper-checkbox-size: 24px;
-        width: 100%;
         font-size: 20px;
         padding: 24px 24px 24px 32px;
+        width: 100%;
       }
     `;
   }
