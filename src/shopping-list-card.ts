@@ -102,26 +102,27 @@ export class ShoppingListCard extends LitElement {
 
   private _handleChange(item: ShoppingListItem) {
     return (evt): void => {
-      const updatedItem = { ...item, status: evt.target.checked ? 'completed' : 'active' };
       fetch(this._config.api_url, {
         method: 'POST',
+        headers: {
+          Accept: '*/*',
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          query: `mutation updateShoppingListItems($items: [InputShoppingListItem!]!) {
-            updateShoppingListItem(items: $items) {
-              id
-              status
-            }
-          }`,
+          query:
+            'mutation updateShoppingListItems($items: [InputListItem!]!) {            updateShoppingListItems(items: $items) {    status           }          }',
           variables: {
-            items: [updatedItem],
+            items: [{ ...item, status: evt.target.checked ? 'completed' : 'active' }],
           },
         }),
       })
-        .then((response) => {
-          console.log(response);
-          return response.json();
-        })
-        .then(console.log);
+        .then((response) => response.json())
+        .then((json) => {
+          console.log(json);
+          this.hass.callService('homeassistant', 'update_entity', {
+            entity_id: this._config.entity,
+          });
+        });
     };
   }
 
