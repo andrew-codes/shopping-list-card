@@ -6,8 +6,7 @@ export interface ShoppingListCardConfig extends LovelaceCardConfig {
   show_error?: boolean;
   test_gui?: boolean;
   entity: string;
-  purchased_action?: ActionConfig;
-  mark_needed_action?: ActionConfig;
+  api_url: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
   double_tap_action?: ActionConfig;

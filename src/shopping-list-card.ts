@@ -71,9 +71,6 @@ export class ShoppingListCard extends LitElement {
       this.hass.states[this._config.entity].state.toString().replace(/'/g, '"'),
     ) as ShoppingList;
 
-    const itemsByStatus = _.groupBy(items, 'status');
-    console.log(itemsByStatus);
-
     return html`
       <ha-card .header=${this._config.name} tabindex="0" aria-label=${`${this._config.entity}`}>
         <div class="ha-card-body">
@@ -82,7 +79,7 @@ export class ShoppingListCard extends LitElement {
               .filter((item) => item.status === 'active')
               .map(
                 (item) =>
-                  html`<paper-checkbox .checked="${item.status === 'completed'}" @change="${this._handleChange}"
+                  html`<paper-checkbox .checked="${item.status === 'completed'}" @change="${this._handleChange(item)}"
                     >${item.value}</paper-checkbox
                   >`,
               )}
@@ -93,18 +90,39 @@ export class ShoppingListCard extends LitElement {
               .filter((item) => item.status === 'completed')
               .map(
                 (item) =>
-                  html`<paper-checkbox .checked="${item.status === 'completed'}" @change="${this._handleChange}"
+                  html`<paper-checkbox .checked="${item.status === 'completed'}" @change="${this._handleChange(item)}"
                     >${item.value}</paper-checkbox
                   >`,
-        )}
+              )}
           </section>
         </div>
       </ha-card>
     `;
   }
 
-  private _handleChange(evt): void {
-    console.log(evt.target.checked);
+  private _handleChange(item: ShoppingListItem) {
+    return (evt): void => {
+      const updatedItem = { ...item, status: evt.target.checked ? 'completed' : 'active' };
+      fetch(this._config.api_url, {
+        method: 'POST',
+        body: JSON.stringify({
+          query: `mutation updateShoppingListItems($items: [InputShoppingListItem!]!) {
+            updateShoppingListItem(items: $items) {
+              id
+              status
+            }
+          }`,
+          variables: {
+            items: [updatedItem],
+          },
+        }),
+      })
+        .then((response) => {
+          console.log(response);
+          return response.json();
+        })
+        .then(console.log);
+    };
   }
 
   private showWarning(warning: string): TemplateResult {
