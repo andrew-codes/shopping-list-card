@@ -354,7 +354,12 @@ export class ShoppingListCard extends LitElement {
       return;
     }
     const value = _.startCase(this._newItemValue);
-    await this._updateList({ value, status: 'active' });
+    const matchedItem = Object.values(this._items).find((item) => item.value === value);
+    if (matchedItem && matchedItem.id) {
+      this._items[matchedItem.id].status = 'active';
+    } else {
+      await this._updateList({ value, status: 'active' });
+    }
     this.requestUpdate('focused', 'newItem');
   }
 
