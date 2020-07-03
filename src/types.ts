@@ -19,7 +19,7 @@ export interface ShoppingList {
 }
 
 export interface ShoppingListItem {
-  id: string;
+  id?: string;
   value: string;
   status: 'active' | 'completed';
 }
