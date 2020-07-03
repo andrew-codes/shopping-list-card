@@ -88,29 +88,32 @@ export class ShoppingListCard extends LitElement {
       return this.showWarning(localize('common.show_warning'));
     }
     this._listId = this.hass.states[this._config.entity].state;
+    const items = Object.values(this._items);
+    const activeItems = items.filter((item) => item.status === 'active');
+    const purchasedItems = items.filter((item) => item.status === 'completed');
 
     return html`
-      <ha-card .header=${this._config.name} tabindex="0" aria-label=${`${this._config.entity}`}>
+      <ha-card .header=${this._config.name} tabindex="-1" aria-label=${`${this._config.entity}`}>
         <div class="ha-card-body">
           <section>
             <paper-input
               id="newItem"
-              tabindex="0"
+              tabindex="-1"
               @keydown="${this._handleNewItemKeyDown}"
               .value="${this._newItemValue}"
             ></paper-input>
             <ha-icon-button icon="mdi:plus" @click="${this._handleNewItemClick}"></ha-icon-button>
           </section>
           <section>
-            <ul class="list">
-              ${Object.values(this._items).map(
-                (item) =>
-                  html` <li>
-                    ${item.id && this._editable[item.id]
-                      ? html`<paper-input
+            <div role="listbox">
+              ${activeItems.map(
+                (item) => html`
+                  ${item.id && this._editable[item.id]
+                    ? html` <div>
+                        <paper-input
                           class="field"
                           label="Item"
-                          tabindex="0"
+                          tabindex="-1"
                           required
                           .id="Item-${item.id}"
                           auto-validate
@@ -118,35 +121,60 @@ export class ShoppingListCard extends LitElement {
                           .value="${item.value}"
                           @change="${this._handleValueChange(item)}"
                           @keydown="${this.handleValueKeydownChange(item)}"
-                        ></paper-input>`
-                      : html`<paper-checkbox
-                          class="field"
-                          .checked="${item.status === 'completed'}"
-                          @mousedown="${this._handleStartEditClick(item)}"
-                          @touchstart="${this._handleStartEditClick(item)}"
-                          @mouseout="${this._handleCancelEdit}"
-                          @touchend="${this._handleCancelEdit}"
-                          @touchleave="${this._handleCancelEdit}"
-                          @touchcancel="${this._handleCancelEdit}"
-                          @click="${this._handleItemClick(item)}"
-                          .disabled="${item.id && this._editable[item.id]}"
-                        >
-                          ${item.value}
-                        </paper-checkbox>`}
-                    ${item.id
-                      ? html`<ha-icon-button
-                          .icon="${this._editable[item.id]
-                            ? 'mdi:check'
-                            : item.status === 'active'
-                            ? 'mdi:delete'
-                            : 'mdi:delete-off'}"
-                          .disabled="${item.status !== 'active' && !this._editable[item.id]}"
-                          @click="${this._handleAncillaryClick(item)}"
-                        ></ha-icon-button>`
-                      : ''}
-                  </li>`,
+                        ></paper-input>
+                        ${item.id
+                          ? html`<ha-icon-button
+                              icon="mdi:check"
+                              @click="${this._handleAncillaryClick(item)}"
+                            ></ha-icon-button>`
+                          : ''}
+                      </div>`
+                    : html`<paper-item
+                        @mousedown="${this._handleStartEditClick(item)}"
+                        @touchstart="${this._handleStartEditClick(item)}"
+                        @mouseout="${this._handleCancelEdit}"
+                        @touchend="${this._handleCancelEdit}"
+                        @touchleave="${this._handleCancelEdit}"
+                        @touchcancel="${this._handleCancelEdit}"
+                        @click="${this._handleItemClick(item)}"
+                        .disabled="${item.id && this._editable[item.id]}"
+                      >
+                        <ha-icon icon="mdi:checkbox-blank-outline" class="checkbox"></ha-icon>
+                        <paper-item-body>${item.value}</paper-item-body>
+                        ${item.id
+                          ? html`<ha-icon-button
+                              icon="mdi:delete"
+                              @click="${this._handleAncillaryClick(item)}"
+                            ></ha-icon-button>`
+                          : ''}
+                      </paper-item>`}
+                `,
               )}
-            </ul>
+            </div>
+          </section>
+          <section>
+            <header>
+              <h2>Purchased</h2>
+            </header>
+            <div role="listbox">
+              ${purchasedItems.map(
+                (item) => html` <paper-item
+                  @mousedown="${this._handleStartEditClick(item)}"
+                  @touchstart="${this._handleStartEditClick(item)}"
+                  @mouseout="${this._handleCancelEdit}"
+                  @touchend="${this._handleCancelEdit}"
+                  @touchleave="${this._handleCancelEdit}"
+                  @touchcancel="${this._handleCancelEdit}"
+                  @click="${this._handleItemClick(item)}"
+                  .disabled="${item.id && this._editable[item.id]}"
+                  data-completed="true"
+                >
+                  <ha-icon icon="mdi:checkbox-marked" class="checkbox"></ha-icon>
+                  <paper-item-body>${item.value}</paper-item-body>
+                  <ha-icon-button disabled icon="mdi:delete-off"></ha-icon-button>
+                </paper-item>`,
+              )}
+            </div>
           </section>
         </div>
       </ha-card>
@@ -178,8 +206,8 @@ export class ShoppingListCard extends LitElement {
   }
 
   private _handleStatusChange(item: ShoppingListItem) {
-    return async (evt): Promise<void> => {
-      const status = evt.target.checked ? 'completed' : 'active';
+    return async (): Promise<void> => {
+      const status = item.status === 'active' ? 'completed' : 'active';
       await this._updateList({ ...item, status });
       this.requestUpdate();
     };
@@ -229,7 +257,7 @@ export class ShoppingListCard extends LitElement {
   }
 
   private _handleItemClick(item: ShoppingListItem) {
-    return (evt): void => {
+    return (): void => {
       if (!!this._editPressTimer) {
         clearTimeout(this._editPressTimer);
         this._editPressTimer = undefined;
@@ -239,12 +267,13 @@ export class ShoppingListCard extends LitElement {
       //   this._handleEnableEdit(item.id, true)();
       //   return;
       // }
-      this._handleStatusChange(item)(evt);
+      this._handleStatusChange(item)();
     };
   }
 
   private _handleAncillaryClick(item: ShoppingListItem) {
-    return async (): Promise<void> => {
+    return async (evt): Promise<void> => {
+      evt.stopPropagation();
       if (item.id && this._editable[item.id]) {
         this._handleEnableEdit(item.id, false)();
       } else {
@@ -347,42 +376,49 @@ export class ShoppingListCard extends LitElement {
   static get styles(): CSSResult {
     return css`
       .ha-card-body {
-        padding: 0 16px;
+        padding: 0;
       }
       section:first-child {
         display: flex;
         flex-direction: row;
+        padding-right: 16px;
       }
-      section:first-child paper-input {
+      section paper-input {
         flex: 1;
+        margin: 16px 16px 16px 24px;
       }
       .section-heading {
         margin: 0;
         padding: 0 8px;
       }
-      .list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
+      section > header {
+        border-top: 2px solid gray;
+        padding: 24px 16px 16px;
+        margin: 0 16px;
       }
-      .list > li {
+      [role='listbox'] > * {
         display: flex;
         flex-direction: row;
+        padding-right: 16px;
+        align-items: center;
+      }
+      paper-item {
+        padding: 16px 16px 16px 24px;
         border-bottom: 1px solid lightgray;
       }
-      .list li ha-icon-button {
-        align-self: center;
-        color: gray;
+      paper-item:last-child {
+        border-bottom: 1px solid rgba(0, 0, 0, 0);
       }
-      .list li paper-checkbox {
-        --paper-checkbox-label-spacing: 16px;
-        --paper-checkbox-size: 24px;
-      }
-      .list li .field {
-        box-sizing: border-box;
-        font-size: 20px;
-        padding: 24px 24px 24px 32px;
+      paper-item-body {
         flex: 1;
+        font-size: 20px;
+      }
+      paper-item ha-icon {
+        --mdc-icon-size: 32px;
+        padding-right: 24px;
+      }
+      paper-item[data-completed='true'] {
+        color: lightgray;
       }
     `;
   }
