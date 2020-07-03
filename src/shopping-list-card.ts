@@ -218,14 +218,14 @@ export class ShoppingListCard extends LitElement {
       if (evt.target.value == '' || !item.id) {
         return;
       }
-      this._items[item.id].value = evt.target.value;
+      this._items[item.id].value = _.startCase(evt.target.value);
     };
   }
 
   private handleValueKeydownChange(item: ShoppingListItem) {
     return async (evt): Promise<void> => {
       if (evt.target.value !== '' && item.id && evt.keyCode === 13) {
-        this._items[item.id].value = evt.target.value;
+        this._items[item.id].value = _.startCase(evt.target.value);
         this._handleEnableEdit(item.id, false)();
       }
     };
