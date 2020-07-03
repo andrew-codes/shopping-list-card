@@ -324,7 +324,7 @@ export class ShoppingListCard extends LitElement {
     if (!this._newItemValue || this._newItemValue === '') {
       return;
     }
-    const value = this._newItemValue;
+    const value = _.startCase(this._newItemValue);
     await this._updateList({ value, status: 'active' });
     this.requestUpdate('focused', 'newItem');
   }
