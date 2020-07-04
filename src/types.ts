@@ -21,5 +21,5 @@ export interface ShoppingList {
 export interface ShoppingListItem {
   id?: string;
   value: string;
-  status: 'active' | 'completed';
+  status: 'active' | 'completed' | 'archived';
 }
