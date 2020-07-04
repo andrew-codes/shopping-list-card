@@ -288,6 +288,7 @@ export class ShoppingListCard extends LitElement {
       headers: {
         Accept: '*/*',
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${this._config.api_token}`,
       },
       body: JSON.stringify({
         query: '{ primaryShoppingList { id items { id status value } } }',
@@ -305,6 +306,7 @@ export class ShoppingListCard extends LitElement {
       headers: {
         Accept: '*/*',
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${this._config.api_token}`,
       },
       body: JSON.stringify({
         query:
@@ -334,6 +336,7 @@ export class ShoppingListCard extends LitElement {
       headers: {
         Accept: '*/*',
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${this._config.api_token}`,
       },
       body: JSON.stringify({
         query:
