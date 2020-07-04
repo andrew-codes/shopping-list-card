@@ -15,8 +15,8 @@ jobs:
       - name: Build the file
         run: |
           cd /home/runner/work/shopping-list-card/shopping-list-card
-          npm install
-          npm run build
+          yarn
+          yarn build
 
       # Upload build file to the releas as an asset.
       - name: Upload zip to release
