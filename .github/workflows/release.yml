@@ -28,3 +28,20 @@ jobs:
           asset_name: shopping-list-card.js
           tag: ${{ github.ref }}
           overwrite: true
+
+      - name: Copy dist to root
+        uses: canastro/copy-file-action@master
+        with:
+          source: /home/runner/work/shopping-list-card/shopping-list-card/dist/shopping-list-card.js
+          target: /home/runner/work/shopping-list-card/shopping-list-card/shopping-list-card.js
+
+      - name: Commit dist file
+        uses: EndBug/add-and-commit@v4
+        with:
+          tag: ${{ github.ref }}
+          author_name: Andrew Smith
+          author_email: andrew@andrew.codes
+          message: Release
+          add: "./shopping-list-card.js"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
