@@ -283,6 +283,7 @@ export class ShoppingListCard extends LitElement {
   }
 
   private async _fetchItems(): Promise<void> {
+    console.log(this._config.api_token);
     const response = await fetch(this._config.api_url, {
       method: 'POST',
       headers: {
