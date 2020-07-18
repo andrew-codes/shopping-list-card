@@ -356,7 +356,7 @@ export class ShoppingListCard extends LitElement {
     if (!this._newItemValue || this._newItemValue === '') {
       return;
     }
-    const value = _.startCase(this._newItemValue);
+    const value = this._newItemValue;
     const matchedItem = Object.values(this._items).find((item) => item.value === value);
     if (matchedItem && matchedItem.id) {
       this._items[matchedItem.id].status = 'active';
