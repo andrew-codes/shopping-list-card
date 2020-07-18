@@ -297,6 +297,7 @@ export class ShoppingListCard extends LitElement {
     const {
       data: { shoppingList },
     } = await response.json();
+    console.log(shoppingList);
     this._items = _.keyBy(shoppingList[0].items, 'id');
   }
 
