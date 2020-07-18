@@ -291,13 +291,13 @@ export class ShoppingListCard extends LitElement {
         Authorization: `Bearer ${this._config.api_token}`,
       },
       body: JSON.stringify({
-        query: '{ primaryShoppingList { id items { id status value } } }',
+        query: `{ shoppingList(ids: ["${this._listId}"]) { id items { id status value } } }`,
       }),
     });
     const {
-      data: { primaryShoppingList },
+      data: { shoppingList },
     } = await response.json();
-    this._items = _.keyBy(primaryShoppingList.items, 'id');
+    this._items = _.keyBy(shoppingList[0].items, 'id');
   }
 
   private async _updateList(item: ShoppingListItem): Promise<void> {
